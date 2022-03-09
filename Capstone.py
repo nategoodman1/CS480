@@ -1,9 +1,16 @@
 import csv
+import StudentSort
+import ClassSort
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog as fd
+from tkinter import messagebox
 
-
+Dict = {102: '0', 105: '1', 107: '2', 109: '3', 110: '4', 111: '5', 112: '6', 
+        184: '7', 301: '8', 302: '9', 311: '10', 312: '11', 325: '12', 361: '13', 362: '14', 
+        380: '15', 392: '16', 420: '17', 427: '18', 430: '19', 440: '20', 470: '21', 
+        480: '22', 481: '23', 489: '24', 492: '25'}
+        
 class Student(list):
     first = list[1]
     last = list[2]
@@ -16,11 +23,11 @@ class Student(list):
     timeslot = []
     for i in range(32):
         timeslot.append(list[9+i])
-    pyexp = list[42]
-    vbexp = list[43]
+    pyexp = list[41]
+    vbexp = list[42]
     classesTaken = []
-    for i in range(19):
-        classesTaken.append(list[44+i])
+    for i in range(25):
+        classesTaken.append(list[43+i])
 
 class Schedule(list):
     sub = list[1]
@@ -62,22 +69,20 @@ def sortSchedule():
 
     return
 
-def matchingAlg():
-    #initialize all students with no class taken & all classes with no student
-    #while there are still open classes{
-        #class matches with a student
-        #if student selected time slot matches
-            #if student is not assigned
-                #assign student to class
-            #else student is already assigned to a class
-                #if student 2 is less flexible than student 1
-                    #free student 1
-                    #assign student 2
-                #else student 1 is already least flexible
-                    #keep student 1 assigned
-        #else select next student
-    # }
-    return #tentative matching list
+def matchingAlg(student_list, class_list):
+    StudentAssigned = [len(student_list)]
+    ClassAssigned = [len(class_list)]
+    for a in range(len(StudentAssigned)):
+        StudentAssigned[a] = False
+    for i in range(len(ClassAssigned)):
+        for j in range(len(student_list)):
+            if StudentAssigned[j] == False:
+                if student_list[j].classesTaken[dict(class_list[i].cat)] == True:
+                    #if time slots match up
+                        ClassAssigned[i] = student_list[i].ID
+            else:
+                continue
+    return ClassAssigned
 
 #Do later: properly assign the return data to lists
 #studentData, scheduleData = readData
@@ -91,7 +96,18 @@ frame.grid()
 student_filename = StringVar()
 classes_filename = StringVar()
 output_destination = StringVar()
+quarter_name = StringVar()
+graduation_year = StringVar()
 
+drop = OptionMenu(root,quarter_name,"Fall","Winter","Spring","Summer")
+drop.pack()
+
+def main_function(student_list, class_list):
+    
+    if (len(student_list) > 0) and (len(class_list) > 0):
+        output_destination = matchingAlg(student_list, class_list)
+    else:
+        messagebox.showerror('FileName Error', 'Error: Filename too short. Please verify selected files')        
 
 def select_studentfile():
 
@@ -125,6 +141,6 @@ ttk.Label(frame, text="Output Destination:").grid(column=3, row=3)
 ttk.Button(frame, text="Choose Folder", command=select_output).grid(column=4, row=4)
 output_entry = Entry(frame, textvariable = output_destination).grid(column=3, row=4)
 
-ttk.Button(frame, text="Generate Matches").grid(column=2, row=7)
+ttk.Button(frame, text="Generate Matches", command=main_function(student_filename, classes_filename)).grid(column=2, row=7)
 
 root.mainloop()

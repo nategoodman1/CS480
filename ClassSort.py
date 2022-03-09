@@ -1,4 +1,4 @@
-def sortClasses(classList):
+def sortSchedule(classList):
     n = len(classList)
     classWorkSort(classList, 0, n)
     classList.reverse()
