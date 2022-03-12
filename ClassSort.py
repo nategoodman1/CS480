@@ -3,6 +3,8 @@ def sortSchedule(classList):
     classWorkSort(classList, 0, n)
     classList.reverse()
 
+    return classList
+
 def classPartition(classList, low, high): 
     i = (low-1) #index of smaller element
     pivot = classList[high].cat
