@@ -15,8 +15,8 @@ frame.grid()
 student_filename = StringVar()
 classes_filename = StringVar()
 output_destination = StringVar()
-quarter_name = StringVar()
-graduation_year = StringVar()
+quarter_name_str = StringVar()
+graduation_year_str = StringVar()
 
 def main_function(student_filename, classes_filename):
 
@@ -32,18 +32,19 @@ def main_function(student_filename, classes_filename):
     #converting list of student data into student objects
     student_list = helperFunctions.createStudentClasses(studentDataList)
     class_list = helperFunctions.createScheduleClasses(classDataList)
+
+    for i in range(len(student_list)):
+        helperFunctions.getQuartersTilGrad(student_list[i], graduation_year_str, quarter_name_str)
     
     #Sorting the lists
     sorted_student_list = StudentSort.sortStudents(student_list)
     sorted_class_list = ClassSort.sortSchedule(class_list)
 
-    for i in sorted_student_list:
-        print(sorted_student_list[i].email)
-        print(sorted_student_list[i].quartersTilGrad)
-        print(sorted_student_list[i].apply)
+    for i in range(len(sorted_student_list)):
+        print(sorted_student_list[i].email + " " + str(sorted_student_list[i].year) + " " + str(sorted_student_list[i].quartersTilGrad) + " " + str(sorted_student_list[i].applying) + " " + str(sorted_student_list[i].numClassesTaken))
 
-    for i in sorted_class_list:
-        print(sorted_class_list[i].cat)
+    #for i in range(len(sorted_class_list)):
+       #print(sorted_class_list[i].cat)
     
     #Matching algorithm
     if (len(sorted_student_list) > 0) and (len(sorted_class_list) > 0):
@@ -83,11 +84,11 @@ ttk.Label(frame, text="Output Destination:").grid(column=3, row=3)
 ttk.Button(frame, text="Choose Folder", command=select_output).grid(column=4, row=4)
 output_entry = Entry(frame, textvariable = output_destination).grid(column=3, row=4)
 
-quarter_name.set("Pick a Quarter")
-quarter_menu = ttk.OptionMenu(frame, quarter_name, "Fall", "Winter", "Spring", "Summer")
+quarter_name_str.set("Pick a Quarter")
+quarter_menu = ttk.OptionMenu(frame, quarter_name_str, "Fall", "Winter", "Spring", "Summer")
 quarter_menu.grid(row=3, column = 1)
-graduation_year.set("Select Graduation Year")
-year_menu = ttk.OptionMenu(frame, graduation_year, "2022", "2023", "2024", "2025", "2026")
+graduation_year_str.set("Select Graduation Year")
+year_menu = ttk.OptionMenu(frame, graduation_year_str, "2022", "2023", "2024", "2025", "2026")
 year_menu.grid(row=3,column=2)
 ttk.Label(frame, text="Select Current Quarter").grid(row=3, column=0)
 

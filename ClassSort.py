@@ -1,6 +1,8 @@
+import helperFunctions
+
 def sortSchedule(classList):
     n = len(classList)
-    classWorkSort(classList, 0, n)
+    classWorkSort(classList, 0, n-1)
     classList.reverse()
 
     return classList

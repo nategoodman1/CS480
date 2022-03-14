@@ -1,20 +1,8 @@
-#function that calculates the number of quarters until a student graduates based on their graduation quarter and year, using the selected current quarter and year
-def getQuartersTilGrad(student, currYr, currQrt):
-    quartersTilGrad = 0
-    yearsTilGrad = student.year - currYr
-    student.quartersTilGrad = student.quarter - currQrt
-    student.quartersTilGrad = student.quartersTilGrad + (yearsTilGrad*4)
-
-    #if the student has 3 or fewer quarters to graduate and they are applying for 392, student is bumped up 1 quarter on priority (quartersTilGrad -=1)
-    if student.quartersTilGrad <= 3 and student.applying == 392:
-        student.quartersTilGrad -= 1
-    
-
-#main student sort function
 def sortStudents(studentList):
     n = len(studentList)
-    classesTakenSort(classSelectionSort(gradQrtSort(studentList, 0, n)))
-    
+    gradQrtSort(studentList, 0, n-1)
+    classSelectionSort(studentList)
+
     return studentList
 
 #partition for quarters until graduation sort
@@ -27,7 +15,7 @@ def gradQrtPartition(studentList, low, high):
         if studentList[j].quartersTilGrad <= pivot:
             #increment index of smaller element
             i = i+1
-            studentList[i], studentList[j] = studentList[j], studentList[i] #if this syntax doesn't work, use placeholder variable
+            studentList[i], studentList[j] = studentList[j], studentList[i]
 
     studentList[i+1], studentList[high] = studentList[high], studentList[i+1]
     
@@ -48,14 +36,14 @@ def gradQrtSort(studentList, low, high):
 #partition for class application sort (392 vs 492)
 def selectionPartition(studentList, low, high): 
     i = (low-1) #index of smaller element
-    pivot = studentList[high].apply
+    pivot = int(studentList[high].applying)
 
     for j in range(low, high):
         #if current element is smaller than or equal to pivot
-        if studentList[j].apply <= pivot:
+        if int(studentList[j].applying) <= pivot:
             #increment index of smaller element
             i = i+1
-            studentList[i], studentList[j] = studentList[j], studentList[i] #if this syntax doesn't work, use placeholder variable
+            studentList[i], studentList[j] = studentList[j], studentList[i]
 
     studentList[i+1], studentList[high] = studentList[high], studentList[i+1]
     
@@ -79,22 +67,40 @@ def classSelectionSort(studentList):
     outList = []
 
     while(len(studentList) > 0):
+        #if studentList has only one element, add it to the workList, remove it from studentList, sort workList, then extend workList to outList
+        if len(studentList) == 1:
+            workList.append(studentList[0])
+            studentList.pop(0)
+            #if there is more than one element in workList, sort workList by classes taken
+            if(len(workList) > 1):
+                selectionWorkSort(workList, 0, (len(workList)-1))
+                #reversing output to prioritize 492 over 392
+                workList.reverse()
+                #if there is more than one element in workList, sort workList by classes taken
+                #classesTakenSort(workList)
+            outList.extend(workList)
         #if students 0 and 1 are both graduating in the same quarter, add student 0 to workList and remove it from studentList, then restart loop
-        if studentList[0].quartersTilGrad == studentList[1].quartersTilGrad:
+        elif studentList[0].quartersTilGrad == studentList[1].quartersTilGrad:
             workList.append(studentList[0])
             studentList.pop(0)
             continue
         #if students 0 and 1 are not graduating in the same quarter, add student 0 to workList and remove it from studentList,
         #sort workList by class application, extend workList to outList, and clear workList
         else:
-            workList.append(studentList[0])
-            studentList.pop(0)
-            n = len(workList)
-            selectionWorkSort(workList, 0, n)
-            workList.reverse() #reversing output to prioritize 492 over 392
-            classesTakenSort(workList)
+            #if there is more than one element in workList, sort it. Otherwise, extend it to outList
+            if(len(workList) > 1):
+                selectionWorkSort(workList, 0, (len(workList)-1))
+                #reversing output to prioritize 492 over 392
+                workList.reverse()
+                #if there is more than one element in workList, sort workList by classes taken
+                #classesTakenSort(workList)
+            #extend workList to outList. The students in workList should all be graduating within the same quarter 
+            #and be sorted by the amount of classes they have taken (lowest to highest)
             outList.extend(workList)
             workList.clear()
+            #begin new workList
+            workList.append(studentList[0])
+            studentList.pop(0)
     
     studentList.extend(outList)
 
@@ -109,9 +115,11 @@ def classesTakenPartition(studentList, low, high):
         if studentList[j].numClassesTaken <= pivot:
             #increment index of smaller element
             i = i+1
-            studentList[i], studentList[j] = studentList[j], studentList[i] #if this syntax doesn't work, use placeholder variable
+            studentList[i], studentList[j] = studentList[j], studentList[i]
 
     studentList[i+1], studentList[high] = studentList[high], studentList[i+1]
+
+    return(i+1)
 
 #implement quicksort to sort students by class applying for (392 is first in this sort, so we will need to reverse this output)
 def classesTakenWorkSort(studentList, low, high):
@@ -129,21 +137,32 @@ def classesTakenWorkSort(studentList, low, high):
 def classesTakenSort(studentList):
     workList = []
     outList = []
-
     while(len(studentList) > 0):
+        #if there is only one element left in studentList, add it to the workList, then extend workList to outList
+        if len(studentList) == 1:
+            workList.append(studentList[0])
+            studentList.pop(0)
+            #if there is more than one element in workList, sort it. Otherwise, extend it to outList
+            if(len(workList) > 1):
+                classesTakenWorkSort(workList, 0, (len(workList)-1))
+            outList.extend(workList)
         #if students 0 and 1 are both applying for same class, add student 0 to workList and remove it from studentList, then restart loop
-        if studentList[0].apply == studentList[1].apply:
+        elif int(studentList[0].applying) == int(studentList[1].applying):
             workList.append(studentList[0])
             studentList.pop(0)
             continue
         #if students 0 and 1 are not applying for same class, add student 0 to workList and remove it from studentList,
         #sort workList by classes taken, extend workList to outList, and clear workList
         else:
-            workList.append(studentList[0])
-            studentList.pop(0)
-            n = len(workList)
-            classesTakenWorkSort(workList, 0, n)
+            #if there is more than one element in workList, sort it. Otherwise, extend it to outList
+            if(len(workList) > 1):
+                classesTakenWorkSort(workList, 0, (len(workList)-1))
+            #extend workList to outList. workList should now contain students all applying for the same class sorted by their num of classes taken
             outList.extend(workList)
             workList.clear()
+            #add new element to new workList
+            workList.append(studentList[0])
+            studentList.pop(0)
+            
 
-    studentList.extend(outList)            
+    studentList.extend(outList)
