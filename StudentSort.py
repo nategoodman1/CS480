@@ -87,6 +87,9 @@ def classSelectionSort(studentList):
         #if students 0 and 1 are not graduating in the same quarter, add student 0 to workList and remove it from studentList,
         #sort workList by class application, extend workList to outList, and clear workList
         else:
+            workList.append(studentList[0])
+            studentList.pop(0)
+
             #if there is more than one element in workList, sort it. Otherwise, extend it to outList
             if(len(workList) > 1):
                 selectionWorkSort(workList, 0, (len(workList)-1))
@@ -98,9 +101,6 @@ def classSelectionSort(studentList):
             #and be sorted by the amount of classes they have taken (lowest to highest)
             outList.extend(workList)
             workList.clear()
-            #begin new workList
-            workList.append(studentList[0])
-            studentList.pop(0)
     
     studentList.extend(outList)
 
@@ -154,15 +154,15 @@ def classesTakenSort(studentList):
         #if students 0 and 1 are not applying for same class, add student 0 to workList and remove it from studentList,
         #sort workList by classes taken, extend workList to outList, and clear workList
         else:
+            workList.append(studentList[0])
+            studentList.pop(0)
+
             #if there is more than one element in workList, sort it. Otherwise, extend it to outList
             if(len(workList) > 1):
                 classesTakenWorkSort(workList, 0, (len(workList)-1))
             #extend workList to outList. workList should now contain students all applying for the same class sorted by their num of classes taken
             outList.extend(workList)
             workList.clear()
-            #add new element to new workList
-            workList.append(studentList[0])
-            studentList.pop(0)
             
 
     studentList.extend(outList)

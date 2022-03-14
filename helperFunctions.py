@@ -1,14 +1,13 @@
 import csv
-import StudentSort
-import ClassSort
-import time
+from fileinput import filename
+import os.path
 
 Dict = {'102': 0, '105': 1, '107': 2, '109': 3, '110': 4, '111': 5, '112': 6, 
         '301': 7, '302': 8, '311': 9, '312': 10, '361': 11, '362': 12, '380': 13,
         '420': 14, '427': 15, '430': 16, '440': 17, '467': 18, '470': 19, '480': 20}
 
-DictTimes = {'8:00AM': '0', '9:00AM': '1', '10:00AM': '2', '11:00AM': '3', '12:00PM': '4', '1:00PM': '5',
-        '2:00PM': '6', '3:00PM': '7'}
+DictTimes = {'8:00AM': 0, '9:00AM': 1, '10:00AM': 2, '11:00AM': 3, '12:00PM': 4, '1:00PM': 5,
+        '2:00PM': 6, '3:00PM': 7}
         
 class Student(list):
     def __init__(self,list):
@@ -98,38 +97,44 @@ def createScheduleClasses(listOfClasses):
     return class_list
 
 def matchingAlg(student_list, class_list):
-    StudentAssigned = [len(student_list)]
-    ClassAssigned = [len(class_list)]
+    StudentAssigned = []
+    ClassAssigned = []
     for a in range(len(student_list)):
         StudentAssigned.append(False)
-    for i in range(len(ClassAssigned)):
-        print(i)
+    for i in range(len(class_list)):
+        has492 = False
         numAssigned = 0
         tempID = []
-        print(len(StudentAssigned))
         if(Dict.get(class_list[i].cat) is not None):
             while numAssigned < 2:
-                time.sleep(1)
-                print("in while loop")
-                for j in range(len(student_list)-1):
+                for j in range(len(student_list)):
+                    if(student_list[j].applying == "492" and has492 == True):
+                        continue
+                    if(j == (len(student_list)-1)):
+                        ClassAssigned.append("No TA")
+                        numAssigned = 2
+                        break
+                    if(numAssigned == 2):
+                        break
                     if(StudentAssigned[j] == False):
-                        print("student is not assigned a class")
-                        if(student_list[j].classesTaken[Dict.get(class_list[i].cat)] == "True"):
-                            print("student has taken the class")
+                        if(student_list[j].classesTaken[Dict.get(class_list[i].cat)] == True):
                             if(student_list[j].inEburg == class_list[i].campus):
-                                #Check time slots
-                                print("student matched")
-                                StudentAssigned[j] = True
-                                tempID[numAssigned] = student_list[i].ID
-                                numAssigned += 1
+                                if(checkMatchingClass(student_list[j],class_list[i])):
+                                    StudentAssigned[j] = True
+                                    tempID.append(student_list[j].ID)
+                                    numAssigned += 1
+                                    if(student_list[j].applying == "492"):
+                                        has492 = True
                             else:
                                 continue
                         else:
                             continue
                     else:
                         continue
-        ClassAssigned.append("No TA")
-    ClassAssigned.append(tuple(tempID[0], tempID[1]))
+            ClassAssigned.append(tempID)
+            tempID.clear
+        else:
+            ClassAssigned.append("No TA")
     return ClassAssigned
 
 #function that calculates the number of quarters until a student graduates based on their graduation quarter and year, using the selected current quarter and year
@@ -162,15 +167,44 @@ def getQuartersTilGrad(student, currYrStr, currQrtStr):
 
 def checkMatchingClass(student, schedule):
     daysList = schedule.days.split(" ")
-
     for i in range(len(daysList)):
         if(daysList[i] == 'M'):
-            return student.timeslot[(0)+dict(schedule.timeS)]
+            if(DictTimes.get(schedule.timeS) is None):
+                continue
+            if(student.timeslot[(0)+DictTimes.get(schedule.timeS)] is not False):
+                continue
+            else:
+                return False
         elif(daysList[i] == 'T'):
-            return student.timeslot[(8)+dict(schedule.timeS)]
+            if(DictTimes.get(schedule.timeS) is None):
+                continue
+            if(student.timeslot[(8)+DictTimes.get(schedule.timeS)] is not False):
+                continue
+            else:
+                return False
         elif(daysList[i] == 'W'):
-            return student.timeslot[(16)+dict(schedule.timeS)]
+            if(DictTimes.get(schedule.timeS) is None):
+                continue
+            if(student.timeslot[(16)+DictTimes.get(schedule.timeS)] is not False):
+                continue
+            else:
+                return False
         elif(daysList[i] == 'TH'):
-            return student.timeslot[(24)+dict(schedule.timeS)]
-        else:
-            return True
+            if(DictTimes.get(schedule.timeS) is None):
+                continue
+            if(student.timeslot[(24)+DictTimes.get(schedule.timeS)] is not False):
+                continue
+            else:
+                return False
+    return True
+
+def CSVWrite(students, classes, destinationPath):
+    fileName = "matches.csv"
+    destPath = destinationPath.get()
+    completeName = os.path.join(destPath, fileName)
+    with open(completeName, 'w', newline='') as match_file:
+        writer = csv.writer(match_file)
+        writer.writerow(["Course Number", "Student ID's"])
+        for i in range(len(classes)):
+            writer.writerow([classes[i].cat, students[i]])
+    return

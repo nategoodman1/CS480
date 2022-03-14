@@ -39,18 +39,16 @@ def main_function(student_filename, classes_filename):
     #Sorting the lists
     sorted_student_list = StudentSort.sortStudents(student_list)
     sorted_class_list = ClassSort.sortSchedule(class_list)
-
-    for i in range(len(sorted_student_list)):
-        print(sorted_student_list[i].email + " " + str(sorted_student_list[i].year) + " " + str(sorted_student_list[i].quartersTilGrad) + " " + str(sorted_student_list[i].applying) + " " + str(sorted_student_list[i].numClassesTaken))
-
-    #for i in range(len(sorted_class_list)):
-       #print(sorted_class_list[i].cat)
     
     #Matching algorithm
     if (len(sorted_student_list) > 0) and (len(sorted_class_list) > 0):
         paired_list = helperFunctions.matchingAlg(sorted_student_list, sorted_class_list)
     else:
         messagebox.showerror('FileName Error', 'Error: Filename too short. Please verify selected files')
+
+    helperFunctions.CSVWrite(paired_list, sorted_class_list, output_destination)
+
+    messagebox.showinfo('Success!', 'Success! Students and classes matched and file output to selected destination!')
  
 def select_studentfile():
 
